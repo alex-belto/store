@@ -8,10 +8,10 @@
     <body>
         <header>
             <ul>
-                <li><a href = "index.php">Some Store</a></li>
-                <li><a href = "?products">Каталог Товаров</a></li>
-                <li><a href = "?contacts">Контакты</a></li>
-                <li><a href = "signOut.php">Выйти</a></li>
+                <li><a href = "../index.php">Some Store</a></li>
+                <li><a href = "?users">Users</a></li>
+                <li><a href = "?products">Products</a></li>
+                <li><a href = "signOut.php">Sign Out</a></li>
             </ul>
         </header>
         <main>
