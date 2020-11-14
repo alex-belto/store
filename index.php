@@ -2,9 +2,10 @@
 include 'include.php';
 include 'form.php';
 $content = '';
+$formContent = '';
 
 
-if(isset($_GET)){//аппарат вывода форм
+if(!empty($_GET)){//аппарат вывода форм
     preg_match_all('#\?([A-Za-z]{3,16})#', $_SERVER['REQUEST_URI'],  $matches);
     $formName =  $matches['1']['0'];
 
@@ -15,8 +16,7 @@ if(isset($_GET)){//аппарат вывода форм
         case 'login':
             $formContent = loginForm();
             break;
-        default:
-            $formContent = '';
+        
     }
     
 }
@@ -69,7 +69,41 @@ function registration($link){
    }
 }
 
+function login($link){
+    if(!empty($_POST['login']) AND !empty($_POST['password'])){
+        $login = $_POST['login'];
 
+        $query = "SELECT * FROM users WHERE login = '$login'";
+        $user = mysqli_fetch_assoc(mysqli_query($link, $query));
+
+        if(!empty($user)){
+            $hash = $user['password'];
+            $password = password_verify($_POST['password'], $hash);
+            $status = $user['status'];
+
+            if($status == 'active'){
+                if($hash == $password){
+                    $_SESSION['auth'] = true;
+                    $_SESSION['id'] = $user['id'];
+                    $_SESSION['name'] = $user['name'];
+                    $_SESSION['login'] = $user['login'];
+                    $_SESSION['phone_numb'] = $user['phone_numb'];
+                    $_SESSION['email'] = $user['email'];
+                    $_SESSION['status'] = $user['status'];
+                    $_SESSION['role'] = $user['role'];
+                    $_SESSION['message'] = 'Авторизация успешна';
+                    header('location: index.php'); die();
+                }else{
+                    $_SESSION['message'] = 'Авторизация успешна';
+                }
+            }else{
+                $_SESSION['message'] = 'Доступ к сайту запрещен модератором, обратитесь в поддержку для урегулирования вопроса.';
+            }
+        }else{
+            $_SESSION['message'] = 'Пользователя с такими данными не существует, зарегиструрейтесь для доступа ко всем функциям сайта!';
+        }
+    }
+}
 
 function logout(){
     if(isset($_GET['logout'])){
@@ -79,5 +113,6 @@ function logout(){
 }
 
 logout();
+login($link);
 registration($link);
 include 'layout.php';

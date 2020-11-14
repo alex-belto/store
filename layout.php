@@ -12,11 +12,12 @@
                 <li><a href = "?products">Каталог Товаров</a></li>
                 <li><a href = "?contacts">Контакты</a></li>
                 <?php
-                    if(isset($_SESSION['outh'])){?>
+                    if(isset($_SESSION['auth'])){?>
                         <li><a href = "?logout">Выйти</a></li>
+                        <?= $_SESSION['login'] ?>
                  <?php   }?>
                  <?php
-                    if(!isset($_SESSION['outh'])){?>
+                    if(!isset($_SESSION['auth'])){?>
                         <li><a href = "?login">Войти</a></li>
                         <li><a href = "?registration">Зарегистрироваться</a></li>
                  <?php   }?>
