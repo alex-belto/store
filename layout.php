@@ -9,8 +9,15 @@
         <header>
             <ul>
                 <li><a href = "?index">Some Store</a></li>
-                <li><a href = "?products">Каталог Товаров</a></li>
+                <li><a href = "?catalog">Каталог Товаров</a></li>
+                <?php if(isset($_GET['catalog'])){
+                     echo $category;
+                } ?>
+                <?php if(!empty($subCategory)){
+                     echo $subCategory;
+                } ?>
                 <li><a href = "?contacts">Контакты</a></li>
+                <li><a href = "?basket">Корзина</a></li>
                 <?php
                     if(isset($_SESSION['auth'])){?>
                         <li><a href = "?logout">Выйти</a></li>
@@ -25,9 +32,12 @@
             </ul>
         </header>
         <main>
-            <?= $formContent ?>
-            <?= $content ?>
             <?php if(isset($_SESSION['message'])) echo $_SESSION['message']; unset($_SESSION['message']); ?>
+            <?= $formContent ?>
+            <?= $basket ?>
+            <?= $content ?>
+            
+           
         </main>
         <footer>
         </footer>

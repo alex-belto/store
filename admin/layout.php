@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Some Store</title>
+        <title><?= $title ?></title>
         <meta charset = "utf-8">
         <link rel = "stylesheet" type = "text/css" href = "">
     </head>
@@ -15,7 +15,10 @@
             </ul>
         </header>
         <main>
-
+            <?= $formContent ?>
+            <?php if(isset($_SESSION['message'])) echo $_SESSION['message']; unset($_SESSION['message']); ?>
+            <?= $content ?>
+            
         </main>
         <footer>
         </footer>

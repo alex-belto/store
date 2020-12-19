@@ -31,3 +31,23 @@
                 <input type='submit' name='submit' value='Отправить'><br><br>
             </form>";
     }
+
+    function addProductsForm(){
+        return $formContent = "
+            <form action='' method='POST'>
+                <br><p>Название продукта:</p>
+                <input type='text' name='product'><br><br>
+                <p>Введите имеющееся количество товара:</p>
+                <input type='text' name='quantity'><br><br>
+                <p>Введите цену товара:</p>
+                <input type='text' name='price'><br><br>
+                <p>Введите категорию товара:</p>
+                <input type='text' name='category'><br><br>
+                <p>Введите подкатегорию товара:</p>
+                <input type='text' name='subCategory'><br><br>
+                <p>Введите описание товара:</p>
+                <textarea name='description'></textarea><br><br>
+                <input type='submit' name='submit' value='Отправить'><br><br>
+            </form>";
+    }
+    

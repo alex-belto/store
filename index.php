@@ -112,7 +112,231 @@ function logout(){
     }
 }
 
+function getContent($link, $content){
+   
+        if(isset($_GET['page'])){
+            $page = $_GET['page'];
+        }else{
+            $page = 1;
+        }
+        $notesOnPage = '5';
+        $referencePoint = ($page - 1) * $notesOnPage;
+    
+        preg_match_all('#\?[A-Za-z]{3,16}&&[A-Za-z_]{3,16}&&([A-Za-z_]{3,16})#', $_SERVER['REQUEST_URI'],  $matches);
+        if(!empty($matches['1']['0'])){
+            $subCategoryUrl = $matches['1']['0'];
+        }
+        if(empty($subCategoryUrl)){
+            $query = "SELECT * FROM products LIMIT $referencePoint, $notesOnPage";
+            $result = mysqli_query($link, $query) or die(mysqli_error($link));
+            for($arr = []; $step = mysqli_fetch_assoc($result); $arr[] = $step);
+        }else{
+            $query = "SELECT sub_category.id as sub_id, sub_category.url as sub_url, subCategoryId, description, price, quantity, product, products.id as id  FROM products
+            RIGHT JOIN sub_category ON products.subCategoryId = sub_category.id WHERE sub_category.url = '$subCategoryUrl'";
+            $result = mysqli_query($link, $query) or die(mysqli_error($link));
+            for($arr = []; $step = mysqli_fetch_assoc($result); $arr[] = $step);
+        }
+        
+        //var_dump($arr);
+        if(!empty($arr)){
+            
+        foreach($arr as $value){
+            $productId = $value['id'];
+            $product = $value['product'];
+            $quantity = $value['quantity'];
+            $price = $value['price'];
+            $description = $value['description'];
+            $content .= "<table cellspacing='4'> ";
+            $content .= "
+            <tr>
+                <td>$product</td>
+            </tr>
+            <tr>
+                <td>Кол-во:$quantity  Цена: $price</td>
+                
+            </tr>
+            <tr>
+                <td>$description</td>
+            </tr>";
+            $content.= "</table>";
+            $content .= "
+            <form action='' method='POST'>
+                <input type='hidden' name='productId' value='$productId'>
+                <input type='submit' name='buy' value='Купить'><br><br>
+            </form>";
+        }
+            $query = "SELECT COUNT(*) as count FROM products";
+            $count = mysqli_fetch_assoc(mysqli_query($link, $query))['count'];
+            $numbsOfPage = ceil($count/$notesOnPage);
+    
+            if(!empty($_GET)){
+                preg_match_all('#\?([A-Za-z0-9]{3,16})#', $_SERVER['REQUEST_URI'], $matches);//для того что бы переход на страницу не сносил на пустую адрес строку
+                $requestUri = $matches['1']['0'];
+                //echo $requestUri;
+            }
+            for($i = 1; $i <= $numbsOfPage; $i++){
+                if(!empty($requestUri)){
+                    $content .= "<a href = 'index.php?$requestUri&&page=$i'>$i</a>";
+                }else{
+                    $content .= "<a href = '?page=$i'>$i</a>";
+                }
+            }
+    
+        
+        }else{
+            echo 'пустой масив';
+        }
+        return $content;
+    
+    
+}
+
+function getCategory($link){
+    
+    $query = "SELECT id, name, url FROM category";
+    $result = mysqli_query($link, $query) or die(mysqli_error($link));
+    for($arr = []; $step = mysqli_fetch_assoc($result); $arr[] = $step);
+    $category = '';
+    foreach($arr as $value){
+        $name = $value['name'];
+        $url = $value['url'];
+        $category.= "<li><a href = '?catalog&$url'>$name</a></li>";
+        
+    }
+    
+    return $category;
+}
+
+function getSubCategory($link){
+
+    if(isset($_GET['page'])){
+        $page = $_GET['page'];
+    }else{
+        $page = '1';
+    }
+
+    if(!empty($_GET)){
+        // if(isset($_GET['page'])){
+        //     preg_replace('#.page=/d#', $_SERVER['REQUEST_URI'], '');
+        // }
+        preg_match_all('#\?[A-Za-z]{3,16}&([A-Za-z_]{3,16})#', $_SERVER['REQUEST_URI'],  $matches);
+        if(!empty($matches['1']['0'])){
+            $subCategoryUrl = $matches['1']['0'];
+        }
+       
+    } 
+    if(!empty($subCategoryUrl)){
+        $subCategory = '';
+        $query = "SELECT category.url as url, sub_category.id as sub_id, sub_category.name as sub_name, sub_category.url as sub_url FROM sub_category
+            RIGHT JOIN  category  ON category_id = category.id";
+            $result = mysqli_query($link, $query) or die(mysqli_error($link));
+            for($arr = []; $step = mysqli_fetch_assoc($result); $arr[] = $step);
+
+            
+            foreach($arr as $value){
+                    $category[$value['url']][] = $value['sub_name'];
+                    
+                }
+
+            $urlSubCategory = $category[$subCategoryUrl];
+            
+            foreach($urlSubCategory as $value){
+                $name = $value;
+                $query = "SELECT url FROM sub_category WHERE name = '$name'";
+                $result = mysqli_fetch_assoc(mysqli_query($link, $query));
+                $url = $result['url'];
+                $subCategory.= "<li><a href = '?catalog&&$subCategoryUrl&&$url'>$name</a></li>";
+                }
+                return $subCategory;
+    }
+}
+
+function addToBasket($link){
+    if(isset($_POST['buy'])){
+
+        $_SESSION['basket'] .= $_POST['productId'].'-';
+        $_SESSION['message'] = 'Товар добавлен в корзину!';
+        header('location: index.php');die();
+    }
+
+}
+
+function basket($link){
+    if(isset($_GET['basket'])){
+        $productsIdPrep = explode('-', $_SESSION['basket']);
+        $productsIdPrep = array_unique($productsIdPrep);
+        array_pop($productsIdPrep);
+        $productsId = '';
+        $basket ='';
+
+        foreach($productsIdPrep as $value){
+            $productsId .= $value.',';
+        }
+        $productsId = trim($productsId, '/,');
+        //echo $productsId;
+
+        $query = "SELECT id, product, quantity, price, description FROM products WHERE id IN ($productsId)";
+        $result = mysqli_query($link, $query) or die(mysqli_error($link));
+        for($arr = []; $step = mysqli_fetch_assoc($result); $arr[] = $step);
+            
+        // ?><pre><?php
+        //     var_dump($arr);
+        // ?></pre><?php
+        if(!empty($arr)){
+            foreach($arr as $value){
+                $productId = $value['id'];
+                $product = $value['product'];
+                $quantity = $value['quantity'];
+                $price = $value['price'];
+                $description = $value['description'];
+    
+                $basket .= "
+                <tr>
+                    <td>$product</td>
+                </tr><br>
+                <tr>
+                    <td> В наличии: $quantity Цена: $price</td>
+                    
+                </tr><br>
+                <tr>
+                    <td>$description</td>
+                </tr><br>";
+                $basket.= "</table>";
+                $basket .= "
+                <form action='' method='POST'>
+                    <input type='hidden' name='productId' value='$productId'>
+                    <br>Количество:
+                    <input type='text' name='quantity' value='1'>
+
+                    <input type='submit' name='dellFromBasket' value='Удалить'><br><br>";
+            }
+                $basket .= "<input type='submit' name='deal' value='Оформить заказ'><br><br>
+                        </form>";
+        }else{
+            $_SESSION['message'] = 'Корзина пуста, нажмите на кнопку купить чтобы добавить товар в корзину!';
+        }
+        
+        return $basket;
+    }
+    
+    
+}
+
+function
+
+
 logout();
 login($link);
+$category = getCategory($link);
+$subCategory = getSubCategory($link);
+if(!isset($_GET['basket'])){
+    $content = getContent($link, $content);
+}
+
+$basket = basket($link);
 registration($link);
+addToBasket($link);
+
+
+
 include 'layout.php';
