@@ -254,26 +254,62 @@ function getSubCategory($link){
 function addToBasket($link){
     if(isset($_POST['buy'])){
 
-        $_SESSION['basket'] .= $_POST['productId'].'-';
+        $_SESSION['products'] = $_POST['productId'];
         $_SESSION['message'] = 'Товар добавлен в корзину!';
-        header('location: index.php');die();
+        header('location: index.php?index');
+        //var_dump($_SESSION);
     }
 
 }
 
 function basket($link){
-    if(isset($_GET['basket'])){
-        $productsIdPrep = explode('-', $_SESSION['basket']);
-        $productsIdPrep = array_unique($productsIdPrep);
-        array_pop($productsIdPrep);
-        $productsId = '';
-        $basket ='';
 
-        foreach($productsIdPrep as $value){
-            $productsId .= $value.',';
+    if(isset($_SESSION['products'])){
+        $_SESSION['basket'][] = $_SESSION['products'];
+        unset($_SESSION['products']);
+    }
+
+    if(isset($_GET['basket'])){
+           
+        
+        if(!empty($_SESSION['basket'])){
+            $productsId = '';
+            
+            $_SESSION['basket'] = array_unique($_SESSION['basket']);
+        
+        //array_pop($_SESSION['basket']);
+        $basket = '';
+        ?><pre><?php
+            //var_dump($_SESSION['basket']);
+        ?></pre><?php
+        
+        $productsId = implode(',', $_SESSION['basket']);
+        $productsId = trim($productsId, ',');
+        echo $productsId;
+    
+    
+    if(isset($_POST['dellFromBasket'])){
+        $quant = count($_SESSION['basket']);
+        if($quant > 1){
+            $dellId = $_POST['productId'];
+            $_SESSION['basket'] = array_diff($_SESSION['basket'], [$dellId]);
+            $productsId = implode(',', $_SESSION['basket']);
+        }else{
+            $dellId = $_POST['productId'];
+            $_SESSION['basket'] = array_diff($_SESSION['basket'], [$dellId]);
+            $productsId = implode(',', $_SESSION['basket']);
+            header('location: index.php?basket'); die();
         }
-        $productsId = trim($productsId, '/,');
-        //echo $productsId;
+        
+       
+    ?><pre><?php
+        //var_dump($_SESSION['basket']);
+    ?></pre><?php
+    }
+    if(isset($_POST['deal'])){
+        $productsId= '';
+        $_SESSION['message'] = 'Заказ оформлен, ждите оповещения от оператора на ваш номер телефона!';
+    }else{
 
         $query = "SELECT id, product, quantity, price, description FROM products WHERE id IN ($productsId)";
         $result = mysqli_query($link, $query) or die(mysqli_error($link));
@@ -308,21 +344,26 @@ function basket($link){
                     <br>Количество:
                     <input type='text' name='quantity' value='1'>
 
-                    <input type='submit' name='dellFromBasket' value='Удалить'><br><br>";
+                    <input type='submit' name='dellFromBasket' value='$productId'><br><br>
+                    </form>";
             }
-                $basket .= "<input type='submit' name='deal' value='Оформить заказ'><br><br>
-                        </form>";
-        }else{
-            $_SESSION['message'] = 'Корзина пуста, нажмите на кнопку купить чтобы добавить товар в корзину!';
+                $basket .= "<form action='' method='POST'>
+                <input type='submit' name='deal' value='Оформить заказ'><br><br></form>";
+        
         }
         
-        return $basket;
-    }
+            return $basket;
+        }
     
+        }else{
+            $_SESSION['message'] = 'Корзина пуста!';
+        }
+        
+    }   
     
 }
 
-function
+
 
 
 logout();
