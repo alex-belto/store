@@ -286,16 +286,31 @@ function basket($link){
         $productsId = implode(',', $_SESSION['basket']);
         $productsId = trim($productsId, ',');
         //echo $productsId;
-    
+        foreach($_POST as $key => $value){
+            if($value != 'Удалить'){
+                $strForDell = $key;
+            }else{
+                break;
+            }
+            
+        }
     
     if(isset($_POST['dellFromBasket'])){
+        
+        echo $strForDell.'<br>';
+        //var_dump($_POST);
         $quant = count($_SESSION['basket']);
         if($quant > 1){
-            $dellId = $_POST['productId'];
+            
+            preg_match_all('#^.+_(.+)$#',  $strForDell, $matches);
+            
+            $dellId = $matches[1][0];
+           
             $_SESSION['basket'] = array_diff($_SESSION['basket'], [$dellId]);
             $productsId = implode(',', $_SESSION['basket']);
         }else{
-            $dellId = $_POST['productId'];
+            preg_match_all('#^.+_(.+)$#',  $strForDell, $matches);
+            $dellId = $dellId = $matches[1][0];
             $_SESSION['basket'] = array_diff($_SESSION['basket'], [$dellId]);
             $productsId = implode(',', $_SESSION['basket']);
             header('location: index.php?basket'); die();
@@ -349,7 +364,7 @@ function basket($link){
                     <br>Количество:
                     <input type='text' name='quantity_$productId' value='1'>
 
-                    <input type='submit' name='dellFromBasket' value='$productId'></br></br>";
+                    <input type='submit' name='dellFromBasket' value='Удалить'></br></br>";
             }
             $basketForm = '';
             
