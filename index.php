@@ -278,14 +278,14 @@ function basket($link){
             $_SESSION['basket'] = array_unique($_SESSION['basket']);
         
         //array_pop($_SESSION['basket']);
-        $basket = '';
+        
         ?><pre><?php
             //var_dump($_SESSION['basket']);
         ?></pre><?php
         
         $productsId = implode(',', $_SESSION['basket']);
         $productsId = trim($productsId, ',');
-        echo $productsId;
+        //echo $productsId;
     
     
     if(isset($_POST['dellFromBasket'])){
@@ -307,7 +307,12 @@ function basket($link){
     ?></pre><?php
     }
     if(isset($_POST['deal'])){
+        ?><pre><?php
+            var_dump($_POST);
+        ?></pre><?php
+       //регуляркой перебрать post
         $productsId= '';
+        unset($_SESSION['basket']);
         $_SESSION['message'] = 'Заказ оформлен, ждите оповещения от оператора на ваш номер телефона!';
     }else{
 
@@ -316,7 +321,7 @@ function basket($link){
         for($arr = []; $step = mysqli_fetch_assoc($result); $arr[] = $step);
             
         // ?><pre><?php
-        //     var_dump($arr);
+            //var_dump($arr);
         // ?></pre><?php
         if(!empty($arr)){
             foreach($arr as $value){
@@ -326,33 +331,46 @@ function basket($link){
                 $price = $value['price'];
                 $description = $value['description'];
     
-                $basket .= "
+                $basket[$value['id']]['table'] = "
                 <tr>
                     <td>$product</td>
-                </tr><br>
+                </tr>
                 <tr>
                     <td> В наличии: $quantity Цена: $price</td>
                     
-                </tr><br>
+                </tr>
                 <tr>
                     <td>$description</td>
-                </tr><br>";
-                $basket.= "</table>";
-                $basket .= "
-                <form action='' method='POST'>
-                    <input type='hidden' name='productId' value='$productId'>
+                </tr>";
+                
+                $basket[$value['id']]['form'] = "
+                
+                    <input type='hidden' name='productId_$productId' value='$productId'>
                     <br>Количество:
-                    <input type='text' name='quantity' value='1'>
+                    <input type='text' name='quantity_$productId' value='1'>
 
-                    <input type='submit' name='dellFromBasket' value='$productId'><br><br>
-                    </form>";
+                    <input type='submit' name='dellFromBasket' value='$productId'></br></br>";
             }
-                $basket .= "<form action='' method='POST'>
-                <input type='submit' name='deal' value='Оформить заказ'><br><br></form>";
+            $basketForm = '';
+            
+            foreach($basket as $value){
+    
+    
+                $basketForm .="<table>";
+                        $basketForm.= $value['table'];
+                $basketForm .="</table>";
+        
+                $basketForm .="<form action='' method='POST'>";
+                
+                            $basketForm .= $value['form'];
+            
+        }
+                $basketForm .="<input type='submit' name='deal' value='Оформить заказ'>";
+                $basketForm .="</form>";
         
         }
-        
-            return $basket;
+           
+            return $basketForm;
         }
     
         }else{
