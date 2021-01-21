@@ -321,14 +321,44 @@ function basket($link){
         //var_dump($_SESSION['basket']);
     ?></pre><?php
     }
+    
     if(isset($_POST['deal'])){
-        ?><pre><?php
-            var_dump($_POST);
-        ?></pre><?php
-       //регуляркой перебрать post
+        $dealProducts = '';
+        $dealQuant = '';
+        foreach($_POST as $key=>$value){
+            preg_match_all('#^(.+)_(.+)$#',  $key, $matches);
+                if(isset($matches[1][0])){
+                if($matches[1][0] == 'productId'){
+                    $dealProducts .= $matches[2][0].',';
+                } elseif($matches[1][0] == 'quantity'){
+                    $dealProducts .= $value.',';
+                    $dealQuant = $value;
+                } elseif($matches[1][0] == 'price'){
+                    $dealProducts .= $value.',';
+                    $dealProducts .= $dealQuant * $value.',';
+                    $dealProducts .= time()."-";
+                }
+            }
+        }
+    
+        
+            $dealProducts = trim($dealProducts, '-');
+            $dealArr = explode('-', $dealProducts);
+            $dealProducts = '';
+            foreach($dealArr as $value){
+                $dealProducts .= "($value)".',';
+           }
+           $dealProducts = trim($dealProducts, ',');
+           echo $dealProducts;
+        
+          
+        $query = "INSERT INTO profit (productsId, quantity, price, amount,  date) VALUES $dealProducts";
+        mysqli_query($link, $query) or die(mysqli_error($link));
+
         $productsId= '';
         unset($_SESSION['basket']);
         $_SESSION['message'] = 'Заказ оформлен, ждите оповещения от оператора на ваш номер телефона!';
+       
     }else{
 
         $query = "SELECT id, product, quantity, price, description FROM products WHERE id IN ($productsId)";
@@ -361,9 +391,10 @@ function basket($link){
                 $basket[$value['id']]['form'] = "
                 
                     <input type='hidden' name='productId_$productId' value='$productId'>
+                    
                     <br>Количество:
                     <input type='text' name='quantity_$productId' value='1'>
-
+                    <input type='hidden' name='price_$productId' value='$price'>
                     <input type='submit' name='dellFromBasket' value='Удалить'></br></br>";
             }
             $basketForm = '';
@@ -410,7 +441,4 @@ if(!isset($_GET['basket'])){
 $basket = basket($link);
 registration($link);
 addToBasket($link);
-
-
-
 include 'layout.php';
