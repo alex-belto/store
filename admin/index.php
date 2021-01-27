@@ -25,6 +25,10 @@ if(!empty($_GET)){//аппарат вывода форм
         case 'users':
             $title = 'Users';
             break;
+        case 'profit':
+            $formContent = profitButtonForm();
+            $title = 'Profit';
+            break;
         
     }
     
@@ -43,13 +47,32 @@ function addProducts($link){
             $description = $_POST['description'];
             $category = $_POST['category'];
             $subCategory = $_POST['subCategory'];
+            $imgTmpName = $_FILES['product_img']['tmp_name'];
+            $imgName = $_FILES['product_img']['name'];
+            $imgPath = '/Applications/MAMP/htdocs/Store/imgb/'.$_FILES['product_img']['name'];
+            
 
-            $query = "INSERT INTO products (product, quantity, price, description, category, subCategory) 
-            VALUE ('$product', '$quantity', '$price', '$description', '$category', '$subCategory')";
+            $query = "SELECT id FROM category WHERE name = '$category'";
+            $result = mysqli_query($link, $query) or die(mysqli_error($link));
+            
+            $query = "SELECT id FROM sub_category WHERE name = '$subCategory'";
+            $result = mysqli_query($link, $query) or die(mysqli_error($link));
+            $subCategoryId = mysqli_fetch_assoc($result)['id'];
+            // var_dump($_FILES);
+            
+           
+            move_uploaded_file($imgTmpName, $imgPath);
+
+
+            $query = "INSERT INTO products (product, img, quantity, price, description,  subCategoryId) 
+            VALUE ('$product', '$imgName', '$quantity', '$price', '$description', '$subCategoryId')";
             mysqli_query($link, $query) or die(mysqli_error($link));
+
+
+
             
             $_SESSION['message'] = 'Товар успешно добавлен';
-            header('location: /Store/admin/?products'); die();
+            //header('location: /Store/admin/?products'); die();
 
         }elseif(!empty($_POST['submit'])){
                 $_SESSION['message'] = 'Ошибка ввода, заполните все поля!'; 
@@ -255,7 +278,7 @@ function editProductsForm($link){
         $subCategory = $result['subCategory'];
 
         return $formContent = "
-            <form action='' method='POST'>
+            <form enctype='multipart/form-data' action='' method='POST'>
                 <br><p>Название продукта:</p>
                 <input type='text' name='product' value='$product'><br><br>
                 <p>Введите имеющееся количество товара:</p>
@@ -281,6 +304,8 @@ function editProduct($link){
         $description = $_POST['description'];
         $category = $_POST['category'];
         $subCategory = $_POST['subCategory'];
+       
+        
         //var_dump($_POST);
         
 
@@ -289,6 +314,52 @@ function editProduct($link){
         mysqli_query($link, $query) or die(mysqli_error($link));
         $_SESSION['message'] = 'Запись изменена!';
         //header('location: /Store/admin/?users'); die();
+    }
+}
+
+function profit($link){
+    if(isset($_GET['profit'])){
+        $content = '';
+        var_dump($_POST);
+
+        $startPoint = time() - 2592000;
+        if(isset($_POST['date'])){
+            switch($_POST['date']){
+                case 'day':
+                    $startPoint = time() - 86400;
+                    break;
+                case 'month':
+                    $startPoint = time() - 2592000;
+                    break;
+                case 'year':
+                    $startPoint = time() - 31556926;
+                    break;
+            }
+        }
+        $time = time();
+        $startDate = date('d.m.Y', $startPoint);
+        $now = date('d.m.Y', time());
+
+        $query = "SELECT SUM(amount) FROM profit WHERE date BETWEEN '$startPoint' AND '$time'";
+        $result = mysqli_query($link, $query) or die(mysqli_error($link));
+        
+        for($arr = []; $step = mysqli_fetch_assoc($result); $arr[] = $step);
+        $amount =  $arr[0]['SUM(amount)'];
+        var_dump($arr);
+
+
+        $content = "
+        <table>
+            <tr>
+                <th>Период</th>
+                <th>Сумма</th>
+            </tr>
+            <tr>
+                <td>$startDate - $now</td>
+                <td>$amount</td>
+            </tr>
+        </table>";
+        return $content;
     }
 }
 
@@ -304,11 +375,13 @@ banUnban($link);
 changeRole($link);
 deleteProducts($link);
 if(isset($_GET['edit'])){
-    $formContent = editProductsForm($link);
+$formContent = editProductsForm($link);
 }
 editProduct($link);
+$content = profit($link);
 $content = getContent($link, $content, $title);
 
 
 logout();
+
 include 'layout.php';

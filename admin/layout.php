@@ -10,6 +10,7 @@
             <ul>
                 <li><a href = "../index.php">Some Store</a></li>
                 <li><a href = "?users">Users</a></li>
+                <li><a href = "?profit">Profit</a></li>
                 <li><a href = "?products">Products</a></li>
                 <li><a href = "signOut.php">Sign Out</a></li>
             </ul>

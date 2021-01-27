@@ -131,7 +131,7 @@ function getContent($link, $content){
             $result = mysqli_query($link, $query) or die(mysqli_error($link));
             for($arr = []; $step = mysqli_fetch_assoc($result); $arr[] = $step);
         }else{
-            $query = "SELECT sub_category.id as sub_id, sub_category.url as sub_url, subCategoryId, description, price, quantity, product, products.id as id  FROM products
+            $query = "SELECT sub_category.id as sub_id, sub_category.url as sub_url, subCategoryId, description, price, quantity, product, img, products.id as id  FROM products
             RIGHT JOIN sub_category ON products.subCategoryId = sub_category.id WHERE sub_category.url = '$subCategoryUrl'";
             $result = mysqli_query($link, $query) or die(mysqli_error($link));
             for($arr = []; $step = mysqli_fetch_assoc($result); $arr[] = $step);
@@ -146,6 +146,8 @@ function getContent($link, $content){
             $quantity = $value['quantity'];
             $price = $value['price'];
             $description = $value['description'];
+            $img = 'imgb/'.$value['img'];
+           
             $content .= "<table cellspacing='4'> ";
             $content .= "
             <tr>
@@ -157,14 +159,19 @@ function getContent($link, $content){
             </tr>
             <tr>
                 <td>$description</td>
+            </tr>
+            <tr>
+                <td><img src='$img'/></td>
             </tr>";
             $content.= "</table>";
+            
             $content .= "
             <form action='' method='POST'>
                 <input type='hidden' name='productId' value='$productId'>
                 <input type='submit' name='buy' value='Купить'><br><br>
             </form>";
         }
+
             $query = "SELECT COUNT(*) as count FROM products";
             $count = mysqli_fetch_assoc(mysqli_query($link, $query))['count'];
             $numbsOfPage = ceil($count/$notesOnPage);

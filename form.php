@@ -34,7 +34,7 @@
 
     function addProductsForm(){
         return $formContent = "
-            <form action='' method='POST'>
+            <form action='' method='POST' enctype='multipart/form-data'>
                 <br><p>Название продукта:</p>
                 <input type='text' name='product'><br><br>
                 <p>Введите имеющееся количество товара:</p>
@@ -47,7 +47,19 @@
                 <input type='text' name='subCategory'><br><br>
                 <p>Введите описание товара:</p>
                 <textarea name='description'></textarea><br><br>
+                <p>Добавьте изображение</p>
+                
+                <input type='file' name='product_img'><br><br>
                 <input type='submit' name='submit' value='Отправить'><br><br>
             </form>";
+    }
+
+    function profitButtonForm(){
+        return $formContent = "
+        <form action='' method='POST'>
+            <input type='submit' name='date' value='day'>
+            <input type='submit' name='date' value='month'>
+            <input type='submit' name='date' value='year'>
+        </form>";
     }
     
