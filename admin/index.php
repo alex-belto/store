@@ -47,25 +47,25 @@ function addProducts($link){
             $description = $_POST['description'];
             $category = $_POST['category'];
             $subCategory = $_POST['subCategory'];
-            $imgTmpName = $_FILES['product_img']['tmp_name'];
-            $imgName = $_FILES['product_img']['name'];
-            $imgPath = '/Applications/MAMP/htdocs/Store/imgb/'.$_FILES['product_img']['name'];
+            $imgTmpName = $_FILES['product_img']['tmp_name'];//временное имя файла
+            $imgName = $_FILES['product_img']['name'];//реальное имя файла
+            $imgPath = '/Applications/MAMP/htdocs/Store/imgb/'.$_FILES['product_img']['name'];//путь к файлу
             
 
             $query = "SELECT id FROM category WHERE name = '$category'";
-            $result = mysqli_query($link, $query) or die(mysqli_error($link));
+            $result = mysqli_query($link, $query) or die(mysqli_error($link));//достаю категории
             
-            $query = "SELECT id FROM sub_category WHERE name = '$subCategory'";
+            $query = "SELECT id FROM sub_category WHERE name = '$subCategory'";//достаю подкатегории
             $result = mysqli_query($link, $query) or die(mysqli_error($link));
             $subCategoryId = mysqli_fetch_assoc($result)['id'];
             // var_dump($_FILES);
             
            
-            move_uploaded_file($imgTmpName, $imgPath);
+            move_uploaded_file($imgTmpName, $imgPath); //загрузка файла на диск
 
 
             $query = "INSERT INTO products (product, img, quantity, price, description,  subCategoryId) 
-            VALUE ('$product', '$imgName', '$quantity', '$price', '$description', '$subCategoryId')";
+            VALUE ('$product', '$imgName', '$quantity', '$price', '$description', '$subCategoryId')";//вношу продукт в базу
             mysqli_query($link, $query) or die(mysqli_error($link));
 
 
@@ -99,7 +99,7 @@ function getContent($link, $content,$title){
     if($title == 'Products'){
 
         $notesOnPage = '5';
-        $referencePoint = ($page - 1) * $notesOnPage;
+        $referencePoint = ($page - 1) * $notesOnPage;//пагинация
         $query = "SELECT * FROM products LIMIT $referencePoint, $notesOnPage";
         $result = mysqli_query($link, $query) or die(mysqli_error($link));
         for($arr = []; $step = mysqli_fetch_assoc($result); $arr[] = $step);
@@ -119,7 +119,7 @@ function getContent($link, $content,$title){
             $quantity = $value['quantity'];
             $price = $value['price'];
             $description = $value['description'];
-            $content.="
+            $content .= "
             <tr>
                 <td>$product</td>
                 <td>$quantity</td>
@@ -130,7 +130,7 @@ function getContent($link, $content,$title){
                 
             </tr>";
         }
-        $content.= "</table>";
+        $content .= "</table>";
         }else{
             echo 'пустой масив';
         }
@@ -177,7 +177,7 @@ function getContent($link, $content,$title){
             $status = $value['status'];
             $role = $value['role'];
             
-            $content.="
+            $content .= "
             <tr>
                 <td>$name</td>
                 <td>$status</td>
@@ -202,7 +202,7 @@ function getContent($link, $content,$title){
                 
         $content .= "</tr>";
         }
-        $content.= "</table>";
+        $content .= "</table>";
         }else{
             echo 'пустой масив';
         }
@@ -320,7 +320,7 @@ function editProduct($link){
 function profit($link){
     if(isset($_GET['profit'])){
         $content = '';
-        var_dump($_POST);
+        //var_dump($_POST);
 
         $startPoint = time() - 2592000;
         if(isset($_POST['date'])){
@@ -344,8 +344,8 @@ function profit($link){
         $result = mysqli_query($link, $query) or die(mysqli_error($link));
         
         for($arr = []; $step = mysqli_fetch_assoc($result); $arr[] = $step);
-        $amount =  $arr[0]['SUM(amount)'];
-        var_dump($arr);
+        $amount =  round($arr[0]['SUM(amount)'], 5);
+        //var_dump($arr);
 
 
         $content = "

@@ -164,12 +164,14 @@ function getContent($link, $content){
                 <td><img src='$img'/></td>
             </tr>";
             $content.= "</table>";
-            
-            $content .= "
-            <form action='' method='POST'>
+            if(isset($_SESSION['auth']) AND $_SESSION['auth'] == true){
+                $content .= "
+                <form action='' method='POST'>
                 <input type='hidden' name='productId' value='$productId'>
                 <input type='submit' name='buy' value='Купить'><br><br>
-            </form>";
+                </form>";
+            }
+            
         }
 
             $query = "SELECT COUNT(*) as count FROM products";
@@ -304,7 +306,7 @@ function basket($link){
     
     if(isset($_POST['dellFromBasket'])){
         
-        echo $strForDell.'<br>';
+        //echo $strForDell.'<br>';
         //var_dump($_POST);
         $quant = count($_SESSION['basket']);
         if($quant > 1){
@@ -356,7 +358,7 @@ function basket($link){
                 $dealProducts .= "($value)".',';
            }
            $dealProducts = trim($dealProducts, ',');
-           echo $dealProducts;
+           //echo $dealProducts;
         
           
         $query = "INSERT INTO profit (productsId, quantity, price, amount,  date) VALUES $dealProducts";
@@ -409,17 +411,17 @@ function basket($link){
             foreach($basket as $value){
     
     
-                $basketForm .="<table>";
+                $basketForm .= "<table>";
                         $basketForm.= $value['table'];
-                $basketForm .="</table>";
+                $basketForm .= "</table>";
         
-                $basketForm .="<form action='' method='POST'>";
+                $basketForm .= "<form action='' method='POST'>";
                 
                             $basketForm .= $value['form'];
             
         }
-                $basketForm .="<input type='submit' name='deal' value='Оформить заказ'>";
-                $basketForm .="</form>";
+                $basketForm .= "<input type='submit' name='deal' value='Оформить заказ'>";
+                $basketForm .= "</form>";
         
         }
            

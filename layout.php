@@ -17,9 +17,11 @@
                      echo $subCategory;
                 } ?>
                 <li><a href = "?contacts">Контакты</a></li>
-                <li><a href = "?basket">Корзина</a></li>
+
+                
                 <?php
-                    if(isset($_SESSION['auth'])){?>
+                    if(isset($_SESSION['auth']) AND $_SESSION['auth'] == true){?>
+                        <li><a href = "?basket">Корзина</a></li>
                         <li><a href = "?logout">Выйти</a></li>
                         <?= $_SESSION['login'] ?>
                  <?php   }?>
